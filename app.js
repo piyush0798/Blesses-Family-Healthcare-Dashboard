@@ -195,9 +195,9 @@ function renderFamilyPage(familyName) {
   const wrap = el("div", { class: "wrap" });
 
   // ---- entry form ----
-  const nameInput = el("input", { id: "f-name", type: "text", placeholder: "e.g. Piyush", autocomplete: "off" });
-  const heightInput = el("input", { id: "f-height", type: "number", step: "0.1", min: "1", max: "9", placeholder: "5.8" });
-  const weightInput = el("input", { id: "f-weight", type: "number", step: "0.1", min: "1", max: "400", placeholder: "70" });
+  const nameInput = el("input", { id: "f-name", type: "text", placeholder: "Enter your name", autocomplete: "off" });
+  const heightInput = el("input", { id: "f-height", type: "number", step: "0.1", min: "1", max: "9", placeholder: "Enter height in feet" });
+  const weightInput = el("input", { id: "f-weight", type: "number", step: "0.1", min: "1", max: "400", placeholder: "Enter weight in kg" });
   const errorEl = el("p", { class: "form-error" }, "");
 
   const submit = () => {
