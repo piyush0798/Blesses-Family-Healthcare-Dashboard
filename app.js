@@ -7,10 +7,10 @@
 const STORAGE_KEY = "blessedFamilyData";
 
 const FAMILIES = [
-  { name: "Nindane", accent: "var(--fam-nindane)", tag: "Chart A" },
-  { name: "Ninariya", accent: "var(--fam-ninariya)", tag: "Chart B" },
-  { name: "Prasad", accent: "var(--fam-prasad)", tag: "Chart C" },
-  { name: "Sarsar", accent: "var(--fam-sarsar)", tag: "Chart D" },
+  { name: "Nindane", accent: "var(--fam-nindane)", tag: "Chart A", icon: "leaf" },
+  { name: "Ninariya", accent: "var(--fam-ninariya)", tag: "Chart B", icon: "sun" },
+  { name: "Prasad", accent: "var(--fam-prasad)", tag: "Chart C", icon: "mountain" },
+  { name: "Sarsar", accent: "var(--fam-sarsar)", tag: "Chart D", icon: "wave" },
 ];
 
 const ZONES = [
@@ -91,6 +91,28 @@ function currentRoute() {
 window.addEventListener("hashchange", render);
 window.addEventListener("DOMContentLoaded", render);
 
+/* ---------------- icons ----------------
+   Small hand-drawn line icons, one per family (leaf / sun / mountain / wave —
+   a bit of distinct personality for each) plus a few functional ones. All
+   inline SVG so there's no icon-font dependency to load. */
+
+const ICONS = {
+  leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 13-14 0 9-4 13-13 14z"/><path d="M6.5 17.5C9 14 11.5 12 15 10"/></svg>`,
+  sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8V21M4.2 12H2.4M21.6 12h-1.8M5.8 5.8 4.4 4.4M19.6 19.6l-1.4-1.4M18.2 5.8l1.4-1.4M5.8 18.2l-1.4 1.4"/></svg>`,
+  mountain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19 9.5 8l3.2 5 2-2.6L21 19H3z"/></svg>`,
+  wave: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9c1.5-1.5 3-1.5 4.5 0s3 1.5 4.5 0 3-1.5 4.5 0 3 1.5 4.5 0"/><path d="M3 15c1.5-1.5 3-1.5 4.5 0s3 1.5 4.5 0 3-1.5 4.5 0 3 1.5 4.5 0"/></svg>`,
+  personPlus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.2"/><path d="M4 20c.8-3.6 3.4-5.5 6-5.5s5.2 1.9 6 5.5"/><path d="M18 8v4M16 10h4"/></svg>`,
+  table: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 9.5h17M9 9.5V19.5"/></svg>`,
+  bars: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V10M12 19V5M19 19v-6"/></svg>`,
+  pulse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 12a1.5 1.5 0 0 0 1.5 1.4h7a1.5 1.5 0 0 0 1.5-1.4L18 7"/></svg>`,
+  pulseLine: `<svg viewBox="0 0 400 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M0 40h60l15-28 20 56 15-40 10 20h30l15-30 20 60 15-38h190"/></svg>`,
+};
+
+function icon(name, extraClass = "") {
+  return el("span", { class: `icon ${extraClass}`.trim(), html: ICONS[name] || "" });
+}
+
 /* ---------------- rendering ---------------- */
 
 function el(tag, attrs = {}, children = []) {
@@ -139,6 +161,7 @@ function renderHome() {
       { class: "home-lede" },
       "Four family charts, one shared record. Choose a family to log a member's height and weight and see their BMI plotted against the household."
     ),
+    el("div", { class: "masthead__pulse", html: ICONS.pulseLine }),
   ]);
   frag.appendChild(masthead);
 
@@ -158,7 +181,10 @@ function renderHome() {
         },
       },
       [
-        el("span", { class: "family-card__tab" }, fam.tag),
+        el("div", { class: "family-card__top" }, [
+          el("span", { class: "family-card__icon" }, icon(fam.icon)),
+          el("span", { class: "family-card__tab" }, fam.tag),
+        ]),
         el("h2", { class: "family-card__name" }, fam.name),
         el("p", { class: "family-card__meta" }, [
           el("strong", {}, String(count)),
@@ -184,7 +210,7 @@ function renderFamilyPage(familyName) {
       "div",
       { style: "margin-top:16px;" },
       el("span", { class: "family-tag", style: `--accent:${fam.accent}` }, [
-        el("span", { class: "dot" }),
+        icon(fam.icon),
         fam.tag,
       ])
     ),
@@ -230,7 +256,7 @@ function renderFamilyPage(familyName) {
   };
 
   const form = el("div", { class: "panel", style: `--accent:${fam.accent}` }, [
-    el("h2", { class: "panel__title" }, "Log a member"),
+    el("h2", { class: "panel__title" }, [icon("personPlus"), "Log a member"]),
     el("div", { class: "field-row" }, [
       el("div", { class: "field" }, [el("label", { for: "f-name" }, "Member name"), nameInput]),
       el("div", { class: "field" }, [el("label", { for: "f-height" }, "Height (feet)"), heightInput]),
@@ -251,7 +277,7 @@ function renderFamilyPage(familyName) {
 
   // ---- members table ----
   const tablePanel = el("div", { class: "panel" }, [
-    el("h2", { class: "panel__title" }, ["Members", el("span", { class: "n" }, `${entries.length} logged`)]),
+    el("h2", { class: "panel__title" }, [icon("table"), "Members", el("span", { class: "n" }, `${entries.length} logged`)]),
   ]);
 
   if (!entries.length) {
@@ -290,7 +316,7 @@ function renderFamilyPage(familyName) {
                 saveData(DATA);
                 render();
               },
-            }, "Remove")
+            }, [icon("trash"), "Remove"])
           ),
         ]);
         tbody.appendChild(tr);
@@ -304,7 +330,7 @@ function renderFamilyPage(familyName) {
 
   // ---- bar chart ----
   const chartPanel = el("div", { class: "panel" }, [
-    el("h2", { class: "panel__title" }, "BMI distribution"),
+    el("h2", { class: "panel__title" }, [icon("bars"), "BMI distribution"]),
   ]);
   if (!entries.length) {
     chartPanel.appendChild(el("p", { class: "empty-note" }, "Chart will appear once a member is logged."));
@@ -351,7 +377,10 @@ function renderResultCard(entry) {
   return el("div", { class: "result-card" }, [
     el("div", { class: "result-card__head" }, [
       el("span", { class: "result-card__name" }, entry.name),
-      el("span", { class: "result-card__bmi" }, String(entry.bmi)),
+      el("span", { class: "result-card__bmi-wrap" }, [
+        icon("pulse", "result-card__pulse"),
+        el("span", { class: "result-card__bmi" }, String(entry.bmi)),
+      ]),
       el("span", { class: "result-card__category", style: `background:${colorForCategory(entry.category)}` }, entry.category),
     ]),
     gauge,
