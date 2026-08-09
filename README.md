@@ -16,8 +16,11 @@ There's deliberately no `/family/*.html` per family — the app uses hash routin
 
 ## BMI logic
 
+Height is entered as **feet and inches separately** (e.g. 5 ft 11 in) to avoid the ambiguity of a single decimal field:
+
 ```
-height_in_meters = height_feet * 0.3048
+total_inches = (feet * 12) + inches
+height_in_meters = total_inches * 0.0254
 BMI = weight_kg / (height_in_meters ^ 2)
 ```
 
@@ -29,7 +32,7 @@ All entries live in `localStorage` under the key `blessedFamilyData`, structured
 
 ```json
 {
-  "Nindane": [{ "name": "Piyush", "height": 5.8, "weight": 70, "bmi": 20.8, "category": "Normal", "ts": 1733740000000 }],
+  "Nindane": [{ "name": "Piyush", "heightFeet": 5, "heightInches": 11, "weight": 70, "bmi": 21.6, "category": "Normal", "ts": 1733740000000 }],
   "Ninariya": [],
   "Prasad": [],
   "Sarsar": []
