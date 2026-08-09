@@ -55,12 +55,13 @@ let DATA = loadData();
 
 /* ---------------- BMI logic ---------------- */
 
-function feetToMeters(feet) {
-  return feet * 0.3048;
+function feetInchesToMeters(feet, inches) {
+  const totalInches = (feet || 0) * 12 + (inches || 0);
+  return totalInches * 0.0254;
 }
 
-function computeBMI(weightKg, heightFeet) {
-  const m = feetToMeters(heightFeet);
+function computeBMI(weightKg, heightFeet, heightInches) {
+  const m = feetInchesToMeters(heightFeet, heightInches);
   return weightKg / (m * m);
 }
 
@@ -222,26 +223,31 @@ function renderFamilyPage(familyName) {
 
   // ---- entry form ----
   const nameInput = el("input", { id: "f-name", type: "text", placeholder: "Enter your name", autocomplete: "off" });
-  const heightInput = el("input", { id: "f-height", type: "number", step: "0.1", min: "1", max: "9", placeholder: "Enter height in feet" });
+  const heightFeetInput = el("input", { id: "f-height-ft", type: "number", step: "1", min: "1", max: "8", placeholder: "Feet" });
+  const heightInchesInput = el("input", { id: "f-height-in", type: "number", step: "1", min: "0", max: "11", placeholder: "Inches" });
   const weightInput = el("input", { id: "f-weight", type: "number", step: "0.1", min: "1", max: "400", placeholder: "Enter weight in kg" });
   const errorEl = el("p", { class: "form-error" }, "");
 
   const submit = () => {
     const name = nameInput.value.trim();
-    const heightFeet = parseFloat(heightInput.value);
+    const heightFeet = parseFloat(heightFeetInput.value);
+    const heightInches = heightInchesInput.value === "" ? 0 : parseFloat(heightInchesInput.value);
     const weightKg = parseFloat(weightInput.value);
 
     if (!name) return (errorEl.textContent = "Enter the member's name.");
-    if (!heightFeet || heightFeet <= 0) return (errorEl.textContent = "Enter a valid height in feet, e.g. 5.8.");
+    if (!heightFeet || heightFeet <= 0) return (errorEl.textContent = "Enter a valid height in feet.");
+    if (Number.isNaN(heightInches) || heightInches < 0 || heightInches >= 12)
+      return (errorEl.textContent = "Inches should be a number from 0 to 11.");
     if (!weightKg || weightKg <= 0) return (errorEl.textContent = "Enter a valid weight in kg.");
 
     errorEl.textContent = "";
-    const bmi = Math.round(computeBMI(weightKg, heightFeet) * 10) / 10;
+    const bmi = Math.round(computeBMI(weightKg, heightFeet, heightInches) * 10) / 10;
     const category = categoryFor(bmi);
 
     DATA[fam.name].push({
       name,
-      height: heightFeet,
+      heightFeet,
+      heightInches,
       weight: weightKg,
       bmi,
       category,
@@ -250,7 +256,8 @@ function renderFamilyPage(familyName) {
     saveData(DATA);
 
     nameInput.value = "";
-    heightInput.value = "";
+    heightFeetInput.value = "";
+    heightInchesInput.value = "";
     weightInput.value = "";
     render();
   };
@@ -259,7 +266,10 @@ function renderFamilyPage(familyName) {
     el("h2", { class: "panel__title" }, [icon("personPlus"), "Log a member"]),
     el("div", { class: "field-row" }, [
       el("div", { class: "field" }, [el("label", { for: "f-name" }, "Member name"), nameInput]),
-      el("div", { class: "field" }, [el("label", { for: "f-height" }, "Height (feet)"), heightInput]),
+      el("div", { class: "field field--pair" }, [
+        el("label", { for: "f-height-ft" }, "Height"),
+        el("div", { class: "field__pair" }, [heightFeetInput, heightInchesInput]),
+      ]),
       el("div", { class: "field" }, [el("label", { for: "f-weight" }, "Weight (kg)"), weightInput]),
       el("button", { class: "btn-primary", style: `--accent:${fam.accent}`, onclick: submit }, "Calculate BMI"),
     ]),
@@ -287,7 +297,7 @@ function renderFamilyPage(familyName) {
     const table = el("table", { class: "members" });
     const thead = el("thead", {}, el("tr", {}, [
       el("th", {}, "Name"),
-      el("th", {}, "Height (ft)"),
+      el("th", {}, "Height"),
       el("th", {}, "Weight (kg)"),
       el("th", {}, "BMI"),
       el("th", {}, "Category"),
@@ -299,9 +309,15 @@ function renderFamilyPage(familyName) {
       .reverse()
       .forEach((entry) => {
         const realIndex = entries.indexOf(entry);
+        const heightDisplay =
+          entry.heightFeet != null
+            ? `${entry.heightFeet}' ${entry.heightInches ?? 0}"`
+            : entry.height != null
+            ? `${entry.height} ft (old entry)`
+            : "—";
         const tr = el("tr", {}, [
           el("td", {}, entry.name),
-          el("td", {}, String(entry.height)),
+          el("td", {}, heightDisplay),
           el("td", {}, String(entry.weight)),
           el("td", { class: "bmi-figure" }, String(entry.bmi)),
           el("td", {}, el("span", { class: "category-pill", style: `background:${colorForCategory(entry.category)}` }, entry.category)),
